@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>为柠檬烯小姐准备的礼物</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #e1afb8 0%, #8dc9f1 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section {
+            display: block;
+        }
+
+        .success-section {
+            display: none;
+        }
+
+        h1 {
+            color: #fdbbda;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .upload-area {
+            border: 3px dashed #e1afb8;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            color: #e1afb8;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #e1afb8 0%, #8dc9f1 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .status-message.error {
+            background: #fee;
+            color: #c33;
+        }
+
+        .status-message.success {
+            background: #efe;
+            color: #3c3;
+        }
+
+        .status-message.info {
+            background: #eef;
+            color: #33c;
+        }
+
+        /* 成功后的动画区域 */
+        .success-content {
+            animation: fadeIn 1s ease-in;
+        }
+
+        .celebration-animation {
+            font-size: 5em;
+            margin: 30px 0;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            position: absolute;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .blessing-text {
+            font-size: 1.8em;
+            color: #efa2c0;
+            margin: 30px 0;
+            line-height: 1.8;
+            font-weight: 300;
+            animation: slideInUp 1s ease-out 0.5s both;
+        }
+
+        .signed-text {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 10px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            animation: slideInUp 1s ease-out 1s both;
+            opacity: 0;
+        }
+
+        .signed-text.show {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .challenge-box {
+            background: #f8f9ff;
+            border: 2px solid #e1afb8;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .challenge-label {
+            color: #e1afb8;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .challenge-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            color: #333;
+            word-break: break-all;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .copy-btn {
+            background: #e1afb8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #43e97b;
+        }
+
+        .instructions {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: left;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .instructions h3 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .instructions code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        /* 解密区域 */
+        .decrypt-box {
+            background: #f8fff8;
+            border: 2px solid #43e97b;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0 0 0;
+            text-align: left;
+        }
+
+        .decrypt-box h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .decrypt-box label {
+            display: block;
+            margin: 12px 0 6px 0;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .decrypt-box textarea,
+        .decrypt-box input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d0e6d6;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+
+        .decrypt-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .decrypt-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(67, 233, 123, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        .decrypt-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 验证成功后放宽宽度并左对齐 */
+        .container.expanded {
+            width: 50%;
+            max-width: none;
+            text-align: left;
+        }
+        .container.expanded .success-content,
+        .container.expanded .blessing-text,
+        .container.expanded .signed-text,
+        .container.expanded .decrypt-box {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 上传验证区域 -->
+        <div class="upload-section" id="uploadSection">
+            <h1>🎁 为柠檬烯小姐准备的礼物</h1>
+            <p style="color: #666; margin-bottom: 30px;">请签名下方的挑战文本以验证身份</p>
+
+            <!-- 挑战文本区域 -->
+            <div class="challenge-box">
+                <div class="challenge-label">挑战文本（请复制并签名）：</div>
+                <div class="challenge-text" id="challengeText"></div>
+                <button class="copy-btn" id="copyBtn">📋 复制挑战</button>
+            </div>
+
+            <!-- 使用说明 -->
+            <div class="instructions">
+                <h3>📝 使用说明：</h3>
+                <ol>
+                    <li>复制上方的挑战文本</li>
+                    <li>在本地使用您的私钥对挑战文本进行签名，例如：
+                        <br><code>echo "挑战文本" | gpg --clearsign > challenge.sig</code>
+                        <br>或使用图形界面工具签名
+                    </li>
+                    <li>上传签名后的文件（.asc 或 .sig 格式）</li>
+                    <li>点击验证按钮完成身份验证</li>
+                </ol>
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">点击或拖拽上传签名文件</div>
+                <div class="upload-hint">支持 .asc, .sig, .txt 等格式</div>
+                <input type="file" id="fileInput" accept=".asc,.sig,.txt,.pgp">
+            </div>
+
+            <div class="file-name" id="fileName"></div>
+            <button class="verify-btn" id="verifyBtn" disabled>验证身份</button>
+            <div id="statusMessage"></div>
+        </div>
+        <div class="after-decrypt-container">
+            <!-- 成功展示区域 -->
+            <div class="success-section" id="successSection">
+                <div class="success-content">
+                    <div class="celebration-animation">🎉</div>
+                    <h1>验证成功！</h1>
+                    <div class="blessing-text" id="blessingText">
+                        愿你的每一天都充满阳光和快乐！<br>
+                        愿你的梦想都能实现！<br>
+                        愿你永远被爱与温暖包围！<br>
+                        <br>
+                        sw不太会设计，h1标题的取色参考了你的头像瞳色，主体背景的取色参考了粉到蓝的渐变色（<br>
+                        希望柠檬烯能够喜欢！<br>
+                        <br>
+                        ❤️ Best wishes() ❤️
+                    </div>
+                    <div class="signed-text" id="signedText"></div>
+
+
+                    <!-- 解密礼物区域（仅在验证后展示） -->
+                    <div class="decrypt-box" id="decryptBox" style="display:none;">
+                        <h3>🔐 解密礼物（仅在本地进行，不会上传，把这个网页下载下来离线也可以运行）</h3>
+                        <p style="color:#666; line-height:1.7; margin-bottom:8px;">礼物内容已使用你的公钥加密。请在下方粘贴你的私钥与口令以在本地解密查看。
+                        </p>
+
+                        <label for="privateKeyInput">私钥（OpenPGP 私钥，ARMOR 格式）</label>
+                        <textarea id="privateKeyInput"
+                            placeholder="-----BEGIN PGP PRIVATE KEY BLOCK-----\n...\n-----END PGP PRIVATE KEY BLOCK-----"
+                            rows="8"></textarea>
+
+                        <label for="passphraseInput">私钥口令（若无留空）</label>
+                        <input type="password" id="passphraseInput" placeholder="输入私钥口令（可留空）" />
+
+                        <div class="decrypt-actions">
+                            <button class="decrypt-btn" id="decryptBtn">解密礼物</button>
+                            <button class="decrypt-btn" id="downloadCipherBtn" type="button">下载密文</button>
+                            <div id="decryptStatus" class="status-message" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OpenPGP.js 库（优先使用本地文件，CDN 作为备用） -->
+    <script src="openpgp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/openpgp@5.11.0/dist/openpgp.min.js"></script>
+
+    <!-- 将加密后的礼物密文嵌入到页面（仅密文可见） -->
+    <script type="application/pgp-encrypted" id="encryptedGift">
+-----BEGIN PGP MESSAGE-----
+
+hF4Dorqag9zmjr8SAQdAdjA1AXcPXiOeu9qvYlDKGhMzlpsgPRtI/D6qpPPBc3Ew
+UpptR82IE6YrMo8Zi82B6N8tXc2gyYQSadjSKJ2YL0yJRpKPRN61yDS1xZfsnqCt
+1OoBCQIQ5A99Fr3KbcqAMm5l/Y+EGfLKocpP52HdQ90uuH9TxO6nrLq8zQwQt6B3
+0XfhZpgWEkoklPMyKuBIx9Z5HAhBhAeTfi8nDp5GFEJbXph9KV2m5EykHsbXjkjf
++SJc8s4bsKIMJdpopHNMy16tW3snDZqBKA7M0eIs7Tx7GTIAvSkIsj55CTiAHKSt
+PtrMdTfZ+pHW3FPjH40W7L+3VK03E58y6Qgul/YzRYZvhV1Uy1fHGNmRPIscyWQ/
+dYrDlXVMEYeH8YD4de6hwVXPnpkT5bDjCJQjPgzGAOAnDqzObnsRPPr6jtLHs2Hk
+f+ppNZVeFuzFuC6dDAmCpGcG5vW7ppxk1AbPFaZh8MKqEZyTnszsSzLdtbRidvyr
+a1QXnU6aubj79+qYt67VEesYjnUdGuTzfVRvc+RwB7imlJEfTf9HUeqRv12djxYt
+ye7TRFOwmbkQbUSwY6btOmxTSMyEA23lmpsSa0GC8bX099MRCXKzd32LacLu6WOu
+9pKxqYHrIgn1NPbgpnctLY/Vo6p4ZBrnkbw8xvt6DgKgiFr3Jdr+ZX/skx/QTeHB
+10YyXU/ZjcCI2agr3j3Rrv2ZxkHjvvx4E+E0TlY2EIaU1OjJIiDchKzqIz7QAcCE
+PeGlBA4D65plSqagA/iomswhPMIMN1YeyAZ0tbDRi63TGIR45eUby2HnLTbyoyNi
+UnyejkyQjQrgfmIkSNcYSmKkm6hHQszxtN7KdgLjMAbARJoSO/7zGJaRm8N4sjOC
+LVsr27r0QUuA72lNza2ha0UeAAlk+TmVnHb1IEvtV9tEMgbXTxoo00VlRiVXqAyr
+/rfraBpDUpklsym2JGYGqyNd0ZzFcEwjgxgJWMybvQ9CYImXlfj/Xu0tC+d03jgR
+Tf0vVn3qHwU9utszRR1MXjgbs88QZRLojLCnAkp3n4DnCjjtOZuJ0knAZ6bAlvUA
+2DEfgnHlH2unaghlKnCBxj360p/yaFuqJV+zUA5EvxJ8jHGoEXL5zIqiVJ+t2Kgh
+8B7kEx3Lyp7SM1oKcUzX22Dnxcr79a8EMnoN/0k6FnvV5xOilO0kp/kkHPbmBjnB
+eeJ7vNXlcK0pv3wCc/Wr0IpGRbD/2tMX4pcyAFw6YCuX1CdaBy5I7mOjIYWGT7Dq
+as0poA/UCAZRoCw+w7rjb+tOH+d1O0P5iFfxH0LWCtE34fjCR0aQx6aNU01eeCEf
+jchygzwcb11ydzzmUhIGxsZ6lOwoICS03T69qUE9MAam6D19LncY+SckwR53Q/rG
+a/KyaCpr9WcEP+TjT6SukXmAqQs4+uivb0atSc7lEQCKbFWotnKl6Am/s4I8atTG
+Ny4g99IgtBEEFadFjd+9H6yVwBqjZ/zMXnlywegK+5SdEiNfwGZ1YuzuLq5fJowt
+mOiX/z2ZGwYF67HPDlgLRzmvuv5Pvu6wxZ+eGVSDMrqIH6FMetoVtbPdes/fDPHv
+faKTrXutx9tN97M/CgeuioD/0sfyuzhpBqHOdb5AuHKDA3mkvGMkoeeys8o5bMKj
+2SUjv5XGlscZXlp16+jFPL9BBA/bmANcRUcVjJv+6LS1jA+uSDOhPb1tv9WS0B4u
+zsxxo6rCevvjvmWEzTQ8Zuy5SricRvpAxGwHQWOIOAAHH7+MErtvjtasnBJxZw==
+=qABd
+-----END PGP MESSAGE-----
+    </script>
+
+    <script>
+        // 如果两者都未加载成功，给出离线提示
+        (function ensureOpenpgp() {
+            if (typeof window.openpgp === 'undefined') {
+                const container = document.getElementById('uploadSection');
+                const warn = document.createElement('div');
+                warn.className = 'status-message error';
+                warn.style.marginTop = '10px';
+                warn.textContent = '检测到缺少 OpenPGP 库。请将 openpgp.min.js 与本页面放在同一目录以支持离线运行，或联网使用以从 CDN 加载。';
+                container.insertBefore(warn, container.firstChild);
+            }
+        })();
+        // ============================================
+        // 配置区域：柠檬烯的 OpenPGP 公钥
+        // ============================================
+        const FRIEND_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mDMEZynSARYJKwYBBAHaRw8BAQdAu4hgrlT1cA1sxhGMoxp+JaVtDNnY/4/d8Ycy
+H6oo/fO0GFNoYW53ZXIgPFNoYW53ZXJAcXEuY29tPoiTBBMWCgA7AhsDBQsJCAcC
+AiICBhUKCQgLAgQWAgMBAh4HAheAFiEEcSYihG+ZNMLW79rvUp9dB5rgnYQFAmcp
+0h8ACgkQUp9dB5rgnYQtCwEA0DgcfBZSvzZgaEvYiLxJvziE4uZlhn0bhc+0waU2
+1KIBAJLtnWpVX6D0SmzRMfWrz+V5W5dtNfNrbKioxy9AbFoBuDgEZynSARIKKwYB
+BAGXVQEFAQEHQKg3t7U6kWlHkyxVYIG6lVlp8Rao45Ay/n3QAouP1plOAwEIB4h4
+BBgWCgAgAhsMFiEEcSYihG+ZNMLW79rvUp9dB5rgnYQFAmcp0h8ACgkQUp9dB5rg
+nYTtoQEAtODytTkVkeG/RZgy3cenkY9dFVLmO0wzl0zkV5zHuzgBAMY04drG1ovK
+QWAVqwXlobHORCb7qZM+RIi0+d1XgrMK
+=iARz
+-----END PGP PUBLIC KEY BLOCK-----`;
+        // ============================================
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const uploadSection = document.getElementById('uploadSection');
+        const successSection = document.getElementById('successSection');
+        const challengeText = document.getElementById('challengeText');
+        const copyBtn = document.getElementById('copyBtn');
+        const signedText = document.getElementById('signedText');
+        const blessingText = document.getElementById('blessingText');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const privateKeyInput = document.getElementById('privateKeyInput');
+        const passphraseInput = document.getElementById('passphraseInput');
+        const decryptStatus = document.getElementById('decryptStatus');
+        const downloadCipherBtn = document.getElementById('downloadCipherBtn');
+
+        let selectedFile = null;
+        let currentChallenge = '';
+
+        // 生成随机挑战
+        function generateChallenge() {
+            // 生成随机字符串（包含时间戳和随机数）
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(2, 15) +
+                Math.random().toString(36).substring(2, 15);
+            const challenge = `GIFT_CHALLENGE_${timestamp}_${random}`;
+            return challenge;
+        }
+
+        // 初始化挑战
+        function initChallenge() {
+            currentChallenge = generateChallenge();
+            challengeText.textContent = currentChallenge;
+        }
+
+        // 页面加载时生成挑战
+        initChallenge();
+
+        // 复制挑战按钮
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(currentChallenge);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ 已复制！';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                // 降级方案：使用传统方法
+                const textArea = document.createElement('textarea');
+                textArea.value = currentChallenge;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '✓ 已复制！';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                } catch (e) {
+                    showStatus('复制失败，请手动选择文本复制', 'error');
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        // 拖拽上传
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFileSelect(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFileSelect(file);
+        });
+
+        function handleFileSelect(file) {
+            if (file) {
+                selectedFile = file;
+                fileName.textContent = `已选择: ${file.name}`;
+                fileName.style.display = 'block';
+                verifyBtn.disabled = false;
+            }
+        }
+
+        // 验证按钮
+        verifyBtn.addEventListener('click', async () => {
+            if (!selectedFile) {
+                showStatus('请先选择签名文件', 'error');
+                return;
+            }
+
+            if (!FRIEND_PUBLIC_KEY || FRIEND_PUBLIC_KEY.trim().length < 50) {
+                showStatus('错误：公钥未配置，请在代码中设置 FRIEND_PUBLIC_KEY', 'error');
+                return;
+            }
+
+            if (!currentChallenge) {
+                showStatus('错误：挑战文本未生成', 'error');
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="loading"></span> 验证中...';
+            showStatus('正在验证签名，请稍候...', 'info');
+
+            try {
+                // 读取签名文件
+                const signatureText = await selectedFile.text();
+
+                // 读取预置的公钥
+                const publicKey = await openpgp.readKey({ armoredKey: FRIEND_PUBLIC_KEY });
+
+                // 尝试读取签名（支持明文签名和分离签名）
+                let message;
+                let signedContent = '';
+
+                try {
+                    // 尝试作为明文签名读取
+                    message = await openpgp.readCleartextMessage({ cleartextMessage: signatureText });
+                    signedContent = message.getText().trim();
+                } catch (e1) {
+                    try {
+                        // 尝试作为分离签名读取（需要原始消息）
+                        // 对于分离签名，我们需要用原始挑战文本进行验证
+                        const messageObject = await openpgp.createMessage({ text: currentChallenge });
+                        const signature = await openpgp.readSignature({ armoredSignature: signatureText });
+
+                        const verificationResult = await openpgp.verify({
+                            message: messageObject,
+                            signature: signature,
+                            verificationKeys: publicKey
+                        });
+
+                        const { verified } = verificationResult.signatures[0];
+                        await verified;
+
+                        if (verified) {
+                            signedContent = currentChallenge; // 分离签名验证成功，内容就是挑战
+                            showSuccess(signedContent);
+                            return;
+                        } else {
+                            throw new Error('签名验证失败');
+                        }
+                    } catch (e2) {
+                        // 尝试作为普通消息读取
+                        try {
+                            message = await openpgp.readMessage({ armoredMessage: signatureText });
+                            // 如果消息是加密的，尝试解密（但通常签名文件不需要解密）
+                            signedContent = message.getText ? message.getText().trim() : '';
+                        } catch (e3) {
+                            throw new Error('无法读取签名文件格式，请确保是有效的 PGP 签名文件');
+                        }
+                    }
+                }
+
+                // 验证签名（明文签名的情况）
+                if (message && message instanceof openpgp.CleartextMessage) {
+                    const verificationResult = await openpgp.verify({
+                        message: message,
+                        verificationKeys: publicKey
+                    });
+
+                    const { verified, keyID } = verificationResult.signatures[0];
+                    await verified; // 等待验证完成
+
+                    if (!verified) {
+                        throw new Error('签名验证失败：签名无效');
+                    }
+
+                    // 检查签名内容是否匹配挑战文本
+                    const contentMatch = signedContent.trim() === currentChallenge.trim();
+
+                    if (!contentMatch) {
+                        showStatus(`验证失败：签名内容不匹配。期望: ${currentChallenge}，实际: ${signedContent}`, 'error');
+                        verifyBtn.disabled = false;
+                        verifyBtn.textContent = '验证身份';
+                        return;
+                    }
+
+                    // 验证成功
+                    showSuccess(signedContent);
+                } else {
+                    throw new Error('无法识别签名格式。请确保使用 clearsign 格式（gpg --clearsign）或分离签名格式（gpg --detach-sign）');
+                }
+            } catch (error) {
+                console.error('验证错误:', error);
+                let errorMsg = error.message || '签名无效或公钥不匹配';
+
+                // 提供更友好的错误提示
+                if (errorMsg.includes('readCleartextMessage') || errorMsg.includes('readSignature')) {
+                    errorMsg = '无法读取签名文件，请确保文件格式正确（.asc 或 .sig 格式）';
+                } else if (errorMsg.includes('readKey')) {
+                    errorMsg = '公钥格式错误，请检查配置的公钥是否正确';
+                } else if (errorMsg.includes('No signatures found')) {
+                    errorMsg = '签名文件中没有找到有效的签名';
+                }
+
+                showStatus('验证失败：' + errorMsg, 'error');
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '验证身份';
+            }
+        });
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type;
+            statusMessage.style.display = 'block';
+        }
+
+        function showSuccess(content) {
+            uploadSection.style.display = 'none';
+            successSection.style.display = 'block';
+            // 放宽容器宽度并左对齐
+            const pageContainer = document.querySelector('.container');
+            if (pageContainer) pageContainer.classList.add('expanded');
+
+            // 显示验证成功的签名内容（挑战文本）
+            signedText.textContent = '验证成功的挑战文本：\n' + content;
+
+            // 延迟显示签名文本动画
+            setTimeout(() => {
+                signedText.classList.add('show');
+            }, 1500);
+
+            // 创建彩纸动画
+            createConfetti();
+
+            // 展示解密区域
+            const decryptBox = document.getElementById('decryptBox');
+            decryptBox.style.display = 'block';
+        }
+
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+            const confettiCount = 50;
+
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 50);
+            }
+        }
+
+        // 本地解密礼物
+        decryptBtn.addEventListener('click', async () => {
+            try {
+                decryptBtn.disabled = true;
+                decryptBtn.textContent = '解密中...';
+                decryptStatus.style.display = 'block';
+                decryptStatus.className = 'status-message info';
+                decryptStatus.textContent = '正在本地解密，请稍候...';
+
+                const armoredPrivateKey = privateKeyInput.value.trim();
+                const passphrase = passphraseInput.value;
+                if (!armoredPrivateKey) {
+                    throw new Error('请粘贴你的私钥');
+                }
+
+                const encryptedGiftArmored = document.getElementById('encryptedGift').textContent.trim();
+                if (!encryptedGiftArmored || encryptedGiftArmored.indexOf('BEGIN PGP MESSAGE') === -1) {
+                    throw new Error('礼物密文未配置或格式不正确');
+                }
+
+                const privateKey = await openpgp.readPrivateKey({ armoredKey: armoredPrivateKey });
+                let decryptedPrivateKey = privateKey;
+                if (privateKey.isDecrypted && !privateKey.isDecrypted()) {
+                    // openpgp v5 privateKey has method isDecrypted(); keep compatibility
+                }
+                if (privateKey.isDecrypted ? !privateKey.isDecrypted() : true) {
+                    // 尝试按口令解锁
+                    decryptedPrivateKey = await openpgp.decryptKey({ privateKey, passphrase: passphrase || '' });
+                }
+
+                const message = await openpgp.readMessage({ armoredMessage: encryptedGiftArmored });
+                const { data: plaintext } = await openpgp.decrypt({
+                    message,
+                    decryptionKeys: decryptedPrivateKey
+                });
+
+                // 显示解密后的礼物内容
+                blessingText.innerHTML = plaintext
+                    .replace(/\n/g, '<br>')
+                    .replace(/\s{2,}/g, ' ');
+
+                decryptStatus.className = 'status-message success';
+                decryptStatus.textContent = '解密成功！已展示礼物内容。';
+            } catch (err) {
+                console.error('解密失败:', err);
+                decryptStatus.style.display = 'block';
+                decryptStatus.className = 'status-message error';
+                decryptStatus.textContent = '解密失败：' + (err.message || '请检查私钥与口令是否正确');
+            } finally {
+                decryptBtn.disabled = false;
+                decryptBtn.textContent = '解密礼物';
+            }
+        });
+
+        // 下载密文
+        downloadCipherBtn.addEventListener('click', () => {
+            try {
+                const encryptedGiftArmored = document.getElementById('encryptedGift').textContent.trim();
+                if (!encryptedGiftArmored) {
+                    showStatus('未找到礼物密文', 'error');
+                    return;
+                }
+                const blob = new Blob([encryptedGiftArmored + '\n'], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'gift.asc';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 0);
+            } catch (e) {
+                showStatus('下载密文失败：' + (e.message || '未知错误'), 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>
